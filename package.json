@@ -17,6 +17,12 @@
   "bugs": {
     "url": "https://github.com/Eyevinn/hls-cmcd/issues"
   },
+  "keywords": [
+    "cta-5004",
+    "cmcd",
+    "m3u8",
+    "hls"
+  ],
   "homepage": "https://github.com/Eyevinn/hls-cmcd#readme",
   "dependencies": {
     "@eyevinn/m3u8": "^0.5.2",
