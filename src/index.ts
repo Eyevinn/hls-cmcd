@@ -1,7 +1,7 @@
 import m3u8 from "@eyevinn/m3u8";
 import { ReadStream } from "fs";
 import { v4 as uuidv4 } from 'uuid';
-import { CMCDPayload, CMCD, createInstance } from "./cmcd";
+import { CMCDPayload, CMCD, createInstance, CMCDObjectTypeToken } from "./cmcd";
 export { CMCDPayload };
 
 export class DecoratedHls {
@@ -24,6 +24,7 @@ export class DecoratedHls {
       if (item.get("bandwidth")) {
         this.initValues.encodedBitrate = Math.floor(item.get("bandwidth") / 1000);
       }
+      this.initValues.objectType = CMCDObjectTypeToken.m;
       const payload = createInstance(searchParams, this.initValues);
       payload.appendSearchParams(searchParams);
       this.applyCMCDPayload(payload, item);
