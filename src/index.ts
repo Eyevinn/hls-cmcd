@@ -21,6 +21,9 @@ export class DecoratedHls {
   private decorateMultivariantManifest(): void {
     this.m3u.items.StreamItem.concat(this.m3u.items.MediaItem).forEach(item => {
       const searchParams = new URLSearchParams(item.get("uri").split("?")[1]);
+      if (item.get("bandwidth")) {
+        this.initValues.encodedBitrate = Math.floor(item.get("bandwidth") / 1000);
+      }
       const payload = createInstance(searchParams, this.initValues);
       payload.appendSearchParams(searchParams);
       this.applyCMCDPayload(payload, item);
