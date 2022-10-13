@@ -46,9 +46,25 @@ describe("CMCD Types", () => {
 
 describe("CMCD Payload", () => {
   test("as query parameters", () => {
-    const payload = new CMCD.CMCDPayload();
-    payload.sessionID = "6e2fb550-c457-11e9-bb97-0800200c9a66";
-    expect(payload.params.toString()).toEqual("CMCD=sid%3D%226e2fb550-c457-11e9-bb97-0800200c9a66%22");
+    let payload = new CMCD.CMCDPayload({
+      sessionID: "6e2fb550-c457-11e9-bb97-0800200c9a66"
+    });
 
+    expect(payload.params.toString()).toEqual("CMCD=sid%3D%226e2fb550-c457-11e9-bb97-0800200c9a66%22");
+    let v = new URLSearchParams(payload.params.toString()).getAll("CMCD")[0].split(",");
+    expect(v.find(k => k.match(/^bs/))).toBeUndefined();
+
+    payload = new CMCD.CMCDPayload({
+      measuredThroughput: 25400,
+      encodedBitrate: 3200,
+      objectDuration: 4004,
+      objectType: CMCD.CMCDObjectTypeToken.v,
+      topBitrate: 6000,
+      bufferStarvation: true,
+      requestedMaximumThroughput: 15000,
+    });
+    v = new URLSearchParams(payload.params.toString()).getAll("CMCD")[0].split(",");
+    expect(v.find(k => k.match(/^bs/))).toBeDefined();
+    expect(v.find(k => k.match(/^bs/))).toEqual("bs");
   });
 });

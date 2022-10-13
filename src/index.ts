@@ -16,8 +16,7 @@ export class DecoratedHls {
 
     this.m3u.items.StreamItem.map(item => {
       const searchParams = new URLSearchParams(item.get("uri").split("?")[1]);
-      const payload = new CMCDPayload();
-      payload.sessionID = sessionID;
+      const payload = new CMCDPayload({ sessionID });
       searchParams.forEach((value, key) => {
         payload.params.set(key, value);
       });

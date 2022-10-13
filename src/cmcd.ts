@@ -146,6 +146,30 @@ export class CMCDVersion extends CMCDKeyValue<Number> {
   }
 }
 
+interface CMCDConstructor {
+  encodedBitrate?: Number;
+  bufferLength?: Number;
+  bufferStarvation?: Boolean;
+  contentID?: string;
+  objectDuration?: Number;
+  deadline?: Number;
+  measuredThroughput?: Number;
+  nextObjectRequest?: string;
+  nextRangeRequest?: string;
+  objectType?: CMCDObjectTypeToken;
+  playbackRate?: Number;
+  requestedMaximumThroughput?: Number;
+  streamingFormat?: Number;
+  sessionID?: string;
+  streamType?: CMCDStreamTypeToken;
+  startup?: boolean;
+  topBitrate?: Number;
+}
+
+function create<T>(ctor: { new (raw): T }, v): T {
+  return v !== undefined ? new ctor(v) : undefined;
+}
+
 export class CMCDPayload {
   private _encodedBitrate?: CMCDEncodedBitrate;
   private _bufferLength?: CMCDBufferLength;
@@ -167,9 +191,25 @@ export class CMCDPayload {
   private _version?: CMCDVersion;
   private _params: URLSearchParams;
 
-  set encodedBitrate(v: Number) { this._encodedBitrate = new CMCDEncodedBitrate(v) }
-
-  set sessionID(v: string) { this._sessionID = new CMCDSessionID(v) }
+  constructor(v: CMCDConstructor) {
+    this._encodedBitrate = create(CMCDEncodedBitrate, v.encodedBitrate);
+    this._bufferLength = create(CMCDBufferLength, v.bufferLength);
+    this._bufferStarvation = create(CMCDBufferStarvation, v.bufferStarvation);
+    this._contentID = create(CMCDContentID, v.contentID);
+    this._objectDuration = create(CMCDObjectDuration, v.objectDuration);
+    this._deadline = create(CMCDDeadline, v.deadline);
+    this._measuredThroughput = create(CMCDMeasuredThroughput, v.measuredThroughput);
+    this._nextObjectRequest = create(CMCDNextObjectRequest, v.nextObjectRequest);
+    this._nextRangeRequest = create(CMCDNextRangeRequest, v.nextRangeRequest);
+    this._objectType = create(CMCDObjectType, v.objectType);
+    this._playbackRate = create(CMCDPlaybackRate, v.playbackRate);
+    this._requestedMaximumThroughput = create(CMCDRequestedMaximumThroughput, v.requestedMaximumThroughput);
+    this._streamingFormat = create(CMCDStreamingFormat, v.streamingFormat);
+    this._sessionID = create(CMCDSessionID, v.sessionID);
+    this._streamType = create(CMCDStreamType, v.streamType);
+    this._startup = create(CMCDStartup, v.startup);
+    this._topBitrate = create(CMCDTopBitrate, v.topBitrate);
+  }
 
   get params() {
     let keys = [ 
@@ -179,7 +219,21 @@ export class CMCDPayload {
       "requestedMaximumThroughput", "streamingFormat", "sessionID",
       "streamType", "startup", "topBitrate", "version"
     ];
-    const kv = keys.map(k => this['_'+k] ? this['_'+k].key + "=" + this['_'+k].value : undefined).filter(n => n);
+    const kv = keys
+      .map(k => {
+        const key = '_' + k;
+        if (this[key]) {
+          if (this[key].value === true) {
+            return this[key].key;
+          } else if (this[key].value === false) {
+            return undefined;
+          } else {
+            return this[key].key + "=" + this[key].value;
+          }
+        }
+        return undefined;
+      })
+      .filter(n => n)
     if (!this._params) {
       this._params = new URLSearchParams({ CMCD: kv.join(",") });
     }

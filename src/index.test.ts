@@ -7,6 +7,5 @@ describe("Multivariant HLS", () => {
     const hls = new DecoratedHls(manifest);
     const m3u = await hls.decorate();
 
-    console.log(m3u.toString());
   });
 });
