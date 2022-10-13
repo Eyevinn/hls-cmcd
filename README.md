@@ -4,6 +4,8 @@
 
 Node library to decorate HLS with CTA-5004 CMCD query params.
 
+Example of use case is to use this library in a proxy that decorates an HLS with CMCD query parameters, in those cases where that is preferred (credit to Anders Näsman/Akamai for the idea).
+
 ```javascript
 const { DecoratedHls } = require("@eyevinn/hls-cmcd");
 
