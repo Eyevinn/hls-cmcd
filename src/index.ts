@@ -1,7 +1,7 @@
 import m3u8 from "@eyevinn/m3u8";
 import { ReadStream } from "fs";
 import { v4 as uuidv4 } from 'uuid';
-import { CMCDPayload, CMCD } from "./cmcd";
+import { CMCDPayload, CMCD, createInstance } from "./cmcd";
 export { CMCDPayload };
 
 export class DecoratedHls {
@@ -19,19 +19,22 @@ export class DecoratedHls {
   }
 
   private decorateMultivariantManifest(): void {
-    const sessionID = this.initValues?.sessionID || uuidv4();
-
     this.m3u.items.StreamItem.concat(this.m3u.items.MediaItem).forEach(item => {
       const searchParams = new URLSearchParams(item.get("uri").split("?")[1]);
-      const payload = new CMCDPayload({ sessionID });
+      const payload = createInstance(searchParams, this.initValues);
       payload.appendSearchParams(searchParams);
       this.applyCMCDPayload(payload, item);
     });
   }
 
   private decorateMediaPlaylist():void {
-    const sessionID = this.initValues?.sessionID || uuidv4();
-    this.m3u.items.PlaylistItem
+    this.m3u.items.PlaylistItem.forEach(item => {
+      const searchParams = new URLSearchParams(item.get("uri").split("?")[1]);
+      this.initValues.objectDuration = parseFloat(item.get("duration")) * 1000;
+      const payload = createInstance(searchParams, this.initValues);
+      payload.appendSearchParams(searchParams);
+      this.applyCMCDPayload(payload, item);
+    });
   }
 
   decorate(): Promise<any> {

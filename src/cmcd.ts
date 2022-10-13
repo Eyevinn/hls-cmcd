@@ -166,8 +166,59 @@ export interface CMCD {
   topBitrate?: Number;
 }
 
+const CMCD_MAP = {
+  "br": "encodedBitrate",
+  "bl": "bufferLength",
+  "bs": "bufferStarvation",
+  "cid": "contentID",
+  "d": "objectDuration",
+  "dl": "deadline",
+  "mtp": "measuredThroughput",
+  "nor": "nextObjectRequest",
+  "nrr": "nextRangeRequest",
+  "ot": "objectType",
+  "pr": "playbackRate",
+  "rtp": "requestedMaximumThroughput",
+  "sf": "streamingFormat",
+  "sid": "sessionID",
+  "st": "streamType",
+  "su": "startup",
+  "tb": "topBitrate"
+};
+
 function create<T>(ctor: { new (raw): T }, v): T {
   return v !== undefined ? new ctor(v) : undefined;
+}
+
+export function createInstance(searchParams: URLSearchParams, override?: CMCD) {
+  let v = [];
+  if (searchParams.getAll("CMCD")[0]) {
+    v = searchParams.getAll("CMCD")[0].split(",");
+  }
+  let cmcd: CMCD = {};
+
+  if (override) {
+    cmcd = override;
+  }
+  v.forEach(kv => {
+    const [k, v] = kv.split("=");
+    if (cmcd[CMCD_MAP[k]]) {
+      // do not overwrite overrides
+      return;
+    }
+    if (v) {
+      if (v[0] === '"' && v[v.length - 1] === '"') {
+        cmcd[CMCD_MAP[k]] = v.substring(1, v.length - 1);
+      } else if (v.match(/^[0-9\.]*$/)) {
+        cmcd[CMCD_MAP[k]] = Number(v);
+      } else {
+        cmcd[CMCD_MAP[k]] = v;
+      }
+    } else {
+      cmcd[CMCD_MAP[k]] = true;
+    }
+  });
+  return new CMCDPayload(cmcd);
 }
 
 export class CMCDPayload {
@@ -217,6 +268,13 @@ export class CMCDPayload {
     });
   }
 
+  get(key: string) {
+    const k = '_' + key;
+    if (this[k]) {
+      return this[k].value;
+    }
+  }
+
   get params() {
     let keys = [ 
       "encodedBitrate", "bufferLength", "bufferStarvation", 
@@ -241,7 +299,11 @@ export class CMCDPayload {
       })
       .filter(n => n)
     if (!this._params) {
-      this._params = new URLSearchParams({ CMCD: kv.join(",") });
+      let v = {};
+      if (kv.length > 0) {
+        v = { CMCD: kv.join(",") }
+      }
+      this._params = new URLSearchParams(v);
     }
     return this._params;
   }
