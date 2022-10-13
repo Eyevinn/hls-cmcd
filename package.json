@@ -19,7 +19,8 @@
   },
   "homepage": "https://github.com/Eyevinn/hls-cmcd#readme",
   "dependencies": {
-    "@eyevinn/m3u8": "^0.5.2"
+    "@eyevinn/m3u8": "^0.5.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.1.2",

@@ -146,7 +146,7 @@ export class CMCDVersion extends CMCDKeyValue<Number> {
   }
 }
 
-interface CMCDConstructor {
+export interface CMCD {
   encodedBitrate?: Number;
   bufferLength?: Number;
   bufferStarvation?: Boolean;
@@ -191,7 +191,7 @@ export class CMCDPayload {
   private _version?: CMCDVersion;
   private _params: URLSearchParams;
 
-  constructor(v: CMCDConstructor) {
+  constructor(v: CMCD) {
     this._encodedBitrate = create(CMCDEncodedBitrate, v.encodedBitrate);
     this._bufferLength = create(CMCDBufferLength, v.bufferLength);
     this._bufferStarvation = create(CMCDBufferStarvation, v.bufferStarvation);
@@ -209,6 +209,12 @@ export class CMCDPayload {
     this._streamType = create(CMCDStreamType, v.streamType);
     this._startup = create(CMCDStartup, v.startup);
     this._topBitrate = create(CMCDTopBitrate, v.topBitrate);
+  }
+
+  appendSearchParams(searchParams: URLSearchParams) {
+    searchParams.forEach((value, key) => {
+      this.params.set(key, value);
+    });
   }
 
   get params() {
