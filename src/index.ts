@@ -1,21 +1,19 @@
 import m3u8 from "@eyevinn/m3u8";
 import { ReadStream } from "fs";
-import { v4 as uuidv4 } from 'uuid';
-import { CMCDPayload, CMCD, createInstance, CMCDObjectTypeToken } from "./cmcd";
-export { CMCDPayload };
+import { Payload, createPayload, CMCDObjectTypeToken } from "@eyevinn/cmcd";
 
 export class DecoratedHls {
   private m3u: any;
   private stream: ReadStream;
-  private initValues?: CMCD;
+  private initValues?;
 
-  constructor(stream: ReadStream, initValues?: CMCD) {
+  constructor(stream: ReadStream, initValues?) {
     this.stream = stream;
     this.initValues = initValues;
   }
 
-  private applyCMCDPayload(payload: CMCDPayload, item): void {
-    item.set("uri", item.get("uri").split("?")[0] + "?" + payload.params.toString());
+  private applyCMCDPayload(payload: Payload, params: URLSearchParams, item): void {
+    item.set("uri", item.get("uri").split("?")[0] + "?" + params.toString() + "&" + payload.toString());
   }
 
   private decorateMultivariantManifest(): void {
@@ -24,10 +22,9 @@ export class DecoratedHls {
       if (item.get("bandwidth")) {
         this.initValues.encodedBitrate = Math.floor(item.get("bandwidth") / 1000);
       }
-      this.initValues.objectType = CMCDObjectTypeToken.m;
-      const payload = createInstance(searchParams, this.initValues);
-      payload.appendSearchParams(searchParams);
-      this.applyCMCDPayload(payload, item);
+      this.initValues.objectType = CMCDObjectTypeToken.manifest;
+      const payload = createPayload(searchParams, this.initValues);
+      this.applyCMCDPayload(payload, searchParams, item);
     });
   }
 
@@ -35,9 +32,8 @@ export class DecoratedHls {
     this.m3u.items.PlaylistItem.forEach(item => {
       const searchParams = new URLSearchParams(item.get("uri").split("?")[1]);
       this.initValues.objectDuration = parseFloat(item.get("duration")) * 1000;
-      const payload = createInstance(searchParams, this.initValues);
-      payload.appendSearchParams(searchParams);
-      this.applyCMCDPayload(payload, item);
+      const payload = createPayload(searchParams, this.initValues);
+      this.applyCMCDPayload(payload, searchParams, item);
     });
   }
 
