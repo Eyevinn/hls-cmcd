@@ -25,6 +25,7 @@
   ],
   "homepage": "https://github.com/Eyevinn/hls-cmcd#readme",
   "dependencies": {
+    "@eyevinn/cmcd": "^0.1.1",
     "@eyevinn/m3u8": "^0.5.2",
     "uuid": "^9.0.0"
   },
